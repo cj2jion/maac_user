@@ -1,21 +1,14 @@
-import numpy as np 
-def fun(low,high):
-    sum1,sum2=0
-    i=low
-    while(i<high):
-        issprise=1,k=2
-        while(k<=np.sqrt(i)):
-            if((i%k)==0):
-                issprise=0
-                k+=1
-        if(issprise==1):
-            if(i<10):
-                sum2+=1
-            else:
-                sum1+=int(i%100/10)
-                sum2+=i%10
-        i+=1
-    print(min(sum1,sum2))
-    return 0
+import tensorflow as tf
+import numpy as np
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
+from tensorflow.python import pywrap_tensorflow
+model_dir=r'train1_3_1/model'
+checkpoint_path = os.path.join(model_dir, "-960")
 
-fun(151,160)
+reader = pywrap_tensorflow.NewCheckpointReader(checkpoint_path)
+
+var_to_shape_map = reader.get_variable_to_shape_map()
+
+for key in var_to_shape_map:
+    print("tensor_name: ", key,reader.get_tensor(key).shape)

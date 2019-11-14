@@ -19,7 +19,7 @@ import os
 from User import User, update_time, ObT
 from users_env import UserEnv
 from scheduler_env import SchedulerEnv
-from maac_1_3_1 import AgentTrainer
+from maac_1_3_2 import AgentTrainer
 
 from simulation_env import SimulationEnv
 import time
