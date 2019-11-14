@@ -97,10 +97,10 @@ def train(arglist):
     saver = tf.train.Saver(max_to_keep=200)
     #get scheduler agent
     # schedulerTrainer=SchedulerTrainer(schedulerenv.s_dim,schedulerenv.a_dim)
-    tf.summary.FileWriter("logs/",sess.graph)
+    
     tempfilename = os.path.basename(__file__)
     (filename, extension) = os.path.splitext(tempfilename)
-
+    tf.summary.FileWriter(filename+"logs/",sess.graph)
     if arglist.mode == "test":
         
         checkpoint = tf.train.get_checkpoint_state("model/")
