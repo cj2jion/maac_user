@@ -4,7 +4,7 @@ import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 from tensorflow.python import pywrap_tensorflow
 model_dir=r'train1_3_1/model'
-checkpoint_path = os.path.join(model_dir, "-960")
+checkpoint_path = os.path.join(model_dir, "-1")
 
 reader = pywrap_tensorflow.NewCheckpointReader(checkpoint_path)
 
