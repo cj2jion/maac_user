@@ -35,7 +35,7 @@ def parse_args():
     # Environment
     # parser.add_argument("--scenario", type=str, default="simple", help="name of the scenario script")
     # parser.add_argument("--max-episode-len", type=int, default=25, help="maximum episode length")
-    parser.add_argument("--num_episodes", type=int, default=5, help="number of episodes")
+    parser.add_argument("--num_episodes", type=int, default=1000, help="number of episodes")
     parser.add_argument("--num_adversaries", type=int, default=0, help="number of adversaries")
     parser.add_argument("--user_num", type=int, default=3, help="number of user")
     # parser.add_argument("--good-policy", type=str, default="maddpg", help="policy for good agents")
@@ -100,7 +100,9 @@ def train(arglist):
     
     tempfilename = os.path.basename(__file__)
     (filename, extension) = os.path.splitext(tempfilename)
-    tf.summary.FileWriter(filename+"logs/",sess.graph)
+    logfliename=filename+"/"+"logs/"
+    os.makedirs(os.path.dirname(logfliename), exist_ok=True)
+    tf.summary.FileWriter(logfliename,sess.graph)
     if arglist.mode == "test":
         
         checkpoint = tf.train.get_checkpoint_state("model/")
@@ -251,7 +253,9 @@ def train(arglist):
             
             ave_r=simulationenv.get_whole_avr_qos()
             user_ave_qos=simulationenv.get_user_avr_qos()
-            fw = open(filename+"_"+arglist.result_file, 'a')
+            resultfliename=filename+"/"+arglist.result_file
+            os.makedirs(os.path.dirname(resultfliename), exist_ok=True)
+            fw = open(resultfliename, 'a')
             fw.write(str(len(episode_rewards))+' '+ str(ave_r)+' '+str(user_ave_qos[0])+' '+str(user_ave_qos[1])+' '+str(user_ave_qos[2])+' '+
             str(episode_rewards[-1])+' '+str(agent_rewards[0][-1])+' '+str(agent_rewards[1][-1])+' '+str(agent_rewards[2][-1])+'\n')
             fw.close()
