@@ -1,0 +1,13 @@
+echo on
+python train0_0.py
+python train0_1.py
+python train0_2.py
+python train0_3.py
+python train0_4.py
+python train0_5.py
+python train1_0.py
+python train1_1.py
+python train1_2.py
+python train1_3.py
+python train1_4.py
+python train1_5.py
