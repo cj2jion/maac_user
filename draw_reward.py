@@ -9,7 +9,7 @@ matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 
 
-fw = open('train1_3_result.txt')
+fw = open('train1_3_1-3000/result.txt')
 
 whole_avr_qos=np.array([], np.float16)
 user1_avr_qos=np.array([], np.float16)
@@ -48,7 +48,7 @@ for line in fw.readlines():
 
 
 fw.close()
-x0 = np.linspace(1, 1000,1000)
+x0 = np.linspace(1, 3000,3000)
 print(num)
 
 y1=whole_avr_qos
@@ -74,9 +74,9 @@ plt.legend(loc='upper left')
 
 plt.figure(num=2)
 l5,= plt.plot(x0,y5,color='black',linewidth=1.0,linestyle=':', label='total reward')
-l6, = plt.plot(x0, y6, color='green', linewidth=1.0, linestyle='-', label='user2')
-l7, = plt.plot(x0, y7, color='red', linewidth=1.0, linestyle='-', label='user3')
-l8, = plt.plot(x0, y8, color='yellow', linewidth=1.0, linestyle='-', label='user3')
+l6, = plt.plot(x0, y6, color='green', linewidth=1.0, linestyle='-', label='user1')
+l7, = plt.plot(x0, y7, color='red', linewidth=1.0, linestyle='-', label='user2')
+# l8, = plt.plot(x0, y8, color='yellow', linewidth=1.0, linestyle='-', label='user3')
 
 plt.xlabel('episode')
 plt.ylabel('reward')
