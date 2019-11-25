@@ -9,7 +9,7 @@ matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 
 
-fw = open('train1_3_1-3000/result.txt')
+fw = open('train1_3_1_2/result.txt')
 
 whole_avr_qos=np.array([], np.float16)
 user1_avr_qos=np.array([], np.float16)
@@ -48,7 +48,7 @@ for line in fw.readlines():
 
 
 fw.close()
-x0 = np.linspace(1, 3000,3000)
+x0 = np.linspace(1, 1000,1000)
 print(num)
 
 y1=whole_avr_qos
@@ -64,23 +64,23 @@ y8=user3_r
 
 plt.figure(num=1)
 l1, =plt.plot(x0, y1, color='black', linewidth=1.0, linestyle=':', label='whole average qos')
-# l2,= plt.plot(x0,y2,color='green',linewidth=1.0,linestyle='-', label='user1')
-# l3, = plt.plot(x0, y3, color='red', linewidth=1.0, linestyle='-', label='user2')
-# l4, = plt.plot(x0, y4, color='yellow', linewidth=1.0, linestyle='-', label='user3')
+l2,= plt.plot(x0,y2,color='green',linewidth=1.0,linestyle='-', label='user1')
+l3, = plt.plot(x0, y3, color='red', linewidth=1.0, linestyle='-', label='user2')
+l4, = plt.plot(x0, y4, color='yellow', linewidth=1.0, linestyle='-', label='user3')
 plt.xlabel('episode num')
 plt.ylabel('qos/query')
 plt.title('average qos per query')
-plt.legend(loc='upper left')
+plt.legend(loc='upper right')
 
 plt.figure(num=2)
 l5,= plt.plot(x0,y5,color='black',linewidth=1.0,linestyle=':', label='total reward')
 l6, = plt.plot(x0, y6, color='green', linewidth=1.0, linestyle='-', label='user1')
 l7, = plt.plot(x0, y7, color='red', linewidth=1.0, linestyle='-', label='user2')
-# l8, = plt.plot(x0, y8, color='yellow', linewidth=1.0, linestyle='-', label='user3')
+l8, = plt.plot(x0, y8, color='yellow', linewidth=1.0, linestyle='-', label='user3')
 
 plt.xlabel('episode')
 plt.ylabel('reward')
 plt.title('episode reward')
-plt.legend(loc='upper left')
+plt.legend(loc='upper right')
 
 plt.show()

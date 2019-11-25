@@ -35,15 +35,15 @@ def parse_args():
     # Environment
     # parser.add_argument("--scenario", type=str, default="simple", help="name of the scenario script")
     # parser.add_argument("--max-episode-len", type=int, default=25, help="maximum episode length")
-    parser.add_argument("--num_episodes", type=int, default=1, help="number of episodes")
+    parser.add_argument("--num_episodes", type=int, default=1000, help="number of episodes")
     parser.add_argument("--num_adversaries", type=int, default=0, help="number of adversaries")
     parser.add_argument("--user_num", type=int, default=3, help="number of user")
     # parser.add_argument("--good-policy", type=str, default="maddpg", help="policy for good agents")
     # parser.add_argument("--adv-policy", type=str, default="maddpg", help="policy of adversaries")
 
     # Core training parameters
-    parser.add_argument("--lr_c", type=float, default=0.0005, help="learning rate for Adam optimizer")
-    parser.add_argument("--lr_a", type=float, default=0.00005, help="learning rate for Adam optimizer")
+    parser.add_argument("--lr_c", type=float, default=0.005, help="learning rate for Adam optimizer")
+    parser.add_argument("--lr_a", type=float, default=0.0005, help="learning rate for Adam optimizer")
     parser.add_argument("--gamma", type=float, default=0.99, help="discount factor")
     parser.add_argument("--batch_size", type=int, default=10000, help="number of episodes to optimize at the same time")
     parser.add_argument("--num_units", type=int, default=128, help="number of units in the mlp")
@@ -94,40 +94,35 @@ def train(arglist):
     # get user agent 
     # obs_shape_n = [userenv.observation_space[i].shape for i in range(userenv.n)]
     trainers = get_trainers(userenv, sess, arglist)
-    saver = tf.train.Saver()
+    saver = tf.train.Saver(max_to_keep=200)
     #get scheduler agent
     # schedulerTrainer=SchedulerTrainer(schedulerenv.s_dim,schedulerenv.a_dim)
-    checkpoint = tf.train.get_checkpoint_state("train1_3_1_2/model/")
-    if checkpoint and checkpoint.model_checkpoint_path:
-        saver.restore(sess, checkpoint.model_checkpoint_path)
-        print("Successfully loaded:", checkpoint.model_checkpoint_path)
-    else:
-        print("Could not find old network weights")
+    
     tempfilename = os.path.basename(__file__)
     (filename, extension) = os.path.splitext(tempfilename)
-    # logfliename=filename+"/"+"logs/"
-    # os.makedirs(os.path.dirname(logfliename), exist_ok=True)
-    # tf.summary.FileWriter(logfliename,sess.graph)
-    # if arglist.mode == "test":
-    #     # savefliename=filename+"/"+arglist.save_dir
-    #     # checkpoint = tf.train.get_checkpoint_state("train1_3_1-3000/model/")
-    #     if checkpoint and checkpoint.model_checkpoint_path:
-    #         saver.restore(sess, './train1_3_1-3000/model/-850')
-    #         print("Successfully loaded:", checkpoint.model_checkpoint_path)
-    #     else:
-    #         print("Could not find old network weights")
+    logfliename=filename+"/"+"logs/"
+    os.makedirs(os.path.dirname(logfliename), exist_ok=True)
+    tf.summary.FileWriter(logfliename,sess.graph)
+    if arglist.mode == "test":
         
-    #     uninitialized_vars = []
-    #     for var in tf.global_variables():
-    #         try:
-    #             sess.run(var)
-    #         except tf.errors.FailedPreconditionError:
-    #             uninitialized_vars.append(var)
+        checkpoint = tf.train.get_checkpoint_state("model/")
+        if checkpoint and checkpoint.model_checkpoint_path:
+            saver.restore(sess, checkpoint.model_checkpoint_path)
+            print("Successfully loaded:", checkpoint.model_checkpoint_path)
+        else:
+            print("Could not find old network weights")
+        
+        uninitialized_vars = []
+        for var in tf.global_variables():
+            try:
+                sess.run(var)
+            except tf.errors.FailedPreconditionError:
+                uninitialized_vars.append(var)
     
-    #     initialize_op = tf.variables_initializer(uninitialized_vars)
-    #     sess.run(initialize_op)
-    # else:
-    #     sess.run(tf.global_variables_initializer())
+        initialize_op = tf.variables_initializer(uninitialized_vars)
+        sess.run(initialize_op)
+    else:
+        sess.run(tf.global_variables_initializer())
 
 
     episode_rewards = [0.0]  # sum of rewards for all agents
@@ -166,7 +161,7 @@ def train(arglist):
                         # print("user-"+str(i)+"--all--state")
                         # print(obs)
                         action_user=trainers[user.id].actor.choose_action(obs_single)
-                        # print("user-action:"+str(action_user)+"time:"+str(simulationenv.sys_time))
+                       # print("user-action:"+str(action_user)+"time:"+str(simulationenv.sys_time))
                         # userenv.action_list[user.id].append(action_user)
                         if len(userenv.action_list) < user.id + 1:
                             for i in range(len(userenv.action_list), user.id  + 1):
@@ -175,7 +170,7 @@ def train(arglist):
 
                         new_user_action=simulationenv.set_user_action(action_user)
                         # new_user_action=[15,1]
-                        print("user-"+str(user.id)+"-action:"+str(new_user_action)+"time:"+str(simulationenv.sys_time))
+                        # print("user-"+str(user.id)+"-action:"+str(new_user_action)+"time:"+str(simulationenv.sys_time))
                         #user environment step
                         rew, done = simulationenv.user_step(new_user_action,user.id)
                         
@@ -201,8 +196,8 @@ def train(arglist):
 
                             rew=userenv.rew_list[user.id][-2]
 
-                            # td_error = trainers[i].critic.learn(obs, rew, new_obs)  # gradient = grad[r + gamma * V(s_) - V(s)]
-                            # trainers[i].actor.learn(single_obs, action_user, td_error)     # true_gradient = grad[logPi(s,a) * td_error]
+                            td_error = trainers[i].critic.learn(obs, rew, new_obs)  # gradient = grad[r + gamma * V(s_) - V(s)]
+                            trainers[i].actor.learn(single_obs, action_user, td_error)     # true_gradient = grad[logPi(s,a) * td_error]
                             # print("user-"+str(user.id)+"learn")
                             episode_rewards[-1] += rew
                             agent_rewards[user.id][-1] += rew
@@ -251,25 +246,25 @@ def train(arglist):
 
         episode_step += 1
         if  terminal:
-            # if (len(episode_rewards) % arglist.save_rate == 0):
-            #     savefliename=filename+"/"+arglist.save_dir
-            #     os.makedirs(os.path.dirname(savefliename), exist_ok=True)
-            #     saver.save(sess, savefliename, global_step= len(episode_rewards))
+            if (len(episode_rewards) % arglist.save_rate == 0):
+                savefliename=filename+"/"+arglist.save_dir
+                os.makedirs(os.path.dirname(savefliename), exist_ok=True)
+                saver.save(sess, savefliename, global_step= len(episode_rewards))
             
             ave_r=simulationenv.get_whole_avr_qos()
             user_ave_qos=simulationenv.get_user_avr_qos()
-            # resultfliename=filename+"/"+arglist.result_file
-            # os.makedirs(os.path.dirname(resultfliename), exist_ok=True)
-            # fw = open(resultfliename, 'a')
-            # fw.write(str(len(episode_rewards))+' '+ str(ave_r)+' '+str(user_ave_qos[0])+' '+str(user_ave_qos[1])+' '+str(user_ave_qos[2])+' '+
-            # str(episode_rewards[-1])+' '+str(agent_rewards[0][-1])+' '+str(agent_rewards[1][-1])+' '+str(agent_rewards[2][-1])+'\n')
-            # fw.close()
-            print('Episode:', len(episode_rewards), ' Reward: %i' % int(scheduler_episode_rewards[-1]),'ave_r:', ave_r, '|', user_ave_qos[0],
-             '|', user_ave_qos[1], '|', user_ave_qos[2],)
+            resultfliename=filename+"/"+arglist.result_file
+            os.makedirs(os.path.dirname(resultfliename), exist_ok=True)
+            fw = open(resultfliename, 'a')
+            fw.write(str(len(episode_rewards))+' '+ str(ave_r)+' '+str(user_ave_qos[0])+' '+str(user_ave_qos[1])+' '+str(user_ave_qos[2])+' '+
+            str(episode_rewards[-1])+' '+str(agent_rewards[0][-1])+' '+str(agent_rewards[1][-1])+' '+str(agent_rewards[2][-1])+'\n')
+            fw.close()
+            # print('Episode:', len(episode_rewards), ' Reward: %i' % int(scheduler_episode_rewards[-1]),'ave_r:', ave_r, '|', user_ave_qos[0],
+            #  '|', user_ave_qos[1], '|', user_ave_qos[2],)
             
-            print("steps: {}, episodes: {},  episode reward: {}, agent episode reward: {}, time: {}".format(
-                train_step, len(episode_rewards)-1, episode_rewards[-1],
-                [rew[-1] for rew in agent_rewards], round(time.time()-t_start, 3)))
+            # print("steps: {}, episodes: {},  episode reward: {}, agent episode reward: {}, time: {}".format(
+            #     train_step, len(episode_rewards)-1, episode_rewards[-1],
+            #     [rew[-1] for rew in agent_rewards], round(time.time()-t_start, 3)))
             simulationenv.reset()
             episode_step = 0
             episode_rewards.append(0)
