@@ -20,6 +20,7 @@ from User import User, update_time, ObT
 from users_env import UserEnv
 from scheduler_env import SchedulerEnv
 from maac_1_3_1 import AgentTrainer
+from ddpg import SchedulerTrainer
 
 from simulation_env import SimulationEnv
 import time
@@ -96,7 +97,7 @@ def train(arglist):
     trainers = get_trainers(userenv, sess, arglist)
     saver = tf.train.Saver(max_to_keep=200)
     #get scheduler agent
-    # schedulerTrainer=SchedulerTrainer(schedulerenv.s_dim,schedulerenv.a_dim)
+    schedulerTrainer=SchedulerTrainer(schedulerenv.s_dim,schedulerenv.a_dim)
     
     tempfilename = os.path.basename(__file__)
     (filename, extension) = os.path.splitext(tempfilename)
@@ -206,18 +207,17 @@ def train(arglist):
         if  simulationenv.stop_flag is False:
             for gpu in simulationenv.BaseStation.gpu_cluster:
                 if gpu.busy_flag is False and gpu.batch_flag is False:
-                    
-                    
-                    # new_action=simulationenv.set_scheduler_action_for_ddpg(action)
-                    new_action=[1,4]
+                    state=simulationenv.get_scheduler_state()
+                    schedulerenv.state_list.append(state)
+                    action=schedulerTrainer.trainer.choose_action(state)
+                    action = np.clip(np.random.normal(action, var), -1, 1)
+
+                    new_action=simulationenv.set_scheduler_action_for_ddpg(action)
+                    # new_action=[1,4]
                     # print("scheduler-action:"+str(new_action)+"time:"+str(simulationenv.sys_time))
                     simulationenv.wait_todo.append([gpu.id,new_action])
                     simulationenv.proceed(True,gpu.id,new_action)     
-                    # else:
-                    #     reward=-10000
-                    #     scheduler_episode_rewards[-1] += reward
-                    #     # agent.replay_buffer.push((state, action, reward, np.float(done)))
-                    #     break
+                    
 
             for gpu in simulationenv.BaseStation.gpu_cluster:
                 reward,flag = simulationenv.scheduler_step(gpu)
@@ -228,7 +228,12 @@ def train(arglist):
                     if gpu.batch.real_size==pow(2,gpu.batch.size_log):
                         schedulerenv.action_list.append(new_action)
                         scheduler_episode_rewards[-1] += reward
-                        
+                        schedulerTrainer.trainer.store_transition(state, action, reward )
+
+            if schedulerTrainer.trainer.pointer > arglist.batch_size:
+                scheduler_train_step += 1
+                var *= .9995    # decay the action randomness
+                schedulerTrainer.trainer.learn()            
             
            
 
@@ -256,7 +261,7 @@ def train(arglist):
             resultfliename=filename+"/"+arglist.result_file
             os.makedirs(os.path.dirname(resultfliename), exist_ok=True)
             fw = open(resultfliename, 'a')
-            fw.write(str(len(episode_rewards))+' '+ str(ave_r)+' '+str(user_ave_qos[0])+' '+str(user_ave_qos[1])+' '+str(user_ave_qos[2])+' '+
+            fw.write(str(len(episode_rewards))+' '+ str(scheduler_episode_rewards[-1])+' '+ str(ave_r)+' '+str(user_ave_qos[0])+' '+str(user_ave_qos[1])+' '+str(user_ave_qos[2])+' '+
             str(episode_rewards[-1])+' '+str(agent_rewards[0][-1])+' '+str(agent_rewards[1][-1])+' '+str(agent_rewards[2][-1])+'\n')
             fw.close()
             # print('Episode:', len(episode_rewards), ' Reward: %i' % int(scheduler_episode_rewards[-1]),'ave_r:', ave_r, '|', user_ave_qos[0],
