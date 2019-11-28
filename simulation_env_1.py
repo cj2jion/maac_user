@@ -42,6 +42,7 @@ class SimulationEnv(object):
         self.live_flag=np.zeros(self.User_num,np.int)
         self.update_live_flag()
         self.Jian_index=0
+        self.query_index=-1
 
     def init(self):
         for i in range(0, self.User_num):
@@ -88,7 +89,7 @@ class SimulationEnv(object):
         self.live_flag=np.zeros(self.User_num,np.int)
         self.update_live_flag()
         self.Jian_index=0
-
+        self.query_index=-1
 
     def get_idle_gpu(self):
         for gpu in self.BaseStation.gpu_cluster:
@@ -477,10 +478,10 @@ class SimulationEnv(object):
 
                 
                 #计算reward
-                qos_total=[self.Qos_memory[i][1] for i in range(len(self.Qos_memory))]
+                qos_total=[self.Qos_memory[i][1] for i in range(len(self.Qos_memory)-1,self.query_index,-1)]
                 
                 reward1=sum(qos_total)/len(qos_total)
-
+                self.query_index=len(self.Qos_memory)-1
 
 
                 user_qos=np.zeros(self.User_num,np.float32)
