@@ -20,7 +20,7 @@ from User import User, update_time, ObT
 from users_env import UserEnv
 from scheduler_env import SchedulerEnv
 from maac_1_3_1 import AgentTrainer
-from ddpg import SchedulerTrainer
+from ddpg3 import SchedulerTrainer
 
 from simulation_env_1 import SimulationEnv
 import time
