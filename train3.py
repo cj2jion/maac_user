@@ -101,6 +101,7 @@ def train(arglist):
     
     tempfilename = os.path.basename(__file__)
     (filename, extension) = os.path.splitext(tempfilename)
+    filename=filename+'_2'
     logfliename=filename+"/"+"logs/"
     os.makedirs(os.path.dirname(logfliename), exist_ok=True)
     tf.summary.FileWriter(logfliename,sess.graph)
@@ -264,6 +265,7 @@ def train(arglist):
             fw.write(str(len(episode_rewards))+' '+ str(scheduler_episode_rewards[-1])+' '+ str(ave_r)+' '+str(user_ave_qos[0])+' '+str(user_ave_qos[1])+' '+str(user_ave_qos[2])+' '+
             str(episode_rewards[-1])+' '+str(agent_rewards[0][-1])+' '+str(agent_rewards[1][-1])+' '+str(agent_rewards[2][-1])+'\n')
             fw.close()
+            print("memory_size:"+str(len(schedulerTrainer.trainer.memory)))
             # print('Episode:', len(episode_rewards), ' Reward: %i' % int(scheduler_episode_rewards[-1]),'ave_r:', ave_r, '|', user_ave_qos[0],
             #  '|', user_ave_qos[1], '|', user_ave_qos[2],)
             
