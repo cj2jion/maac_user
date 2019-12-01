@@ -24,7 +24,7 @@ import time
 
 MAX_EPISODES = 500
 MAX_EP_STEPS = 200
-LR_A = 0.0005   # learning rate for actor
+LR_A = 0.001   # learning rate for actor
 LR_C = 0.005    # learning rate for critic
 GAMMA = 0.99     # reward discount
 TAU = 0.01      # soft replacement

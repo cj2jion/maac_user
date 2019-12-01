@@ -101,7 +101,7 @@ def train(arglist):
     
     tempfilename = os.path.basename(__file__)
     (filename, extension) = os.path.splitext(tempfilename)
-    filename=filename+'_2'
+    filename=filename+'_3'
     logfliename=filename+"/"+"logs/"
     os.makedirs(os.path.dirname(logfliename), exist_ok=True)
     tf.summary.FileWriter(logfliename,sess.graph)
