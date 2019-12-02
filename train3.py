@@ -101,7 +101,7 @@ def train(arglist):
     
     tempfilename = os.path.basename(__file__)
     (filename, extension) = os.path.splitext(tempfilename)
-    filename=filename+'_3'
+    filename=filename+'_5'
     logfliename=filename+"/"+"logs/"
     os.makedirs(os.path.dirname(logfliename), exist_ok=True)
     tf.summary.FileWriter(logfliename,sess.graph)
@@ -171,7 +171,7 @@ def train(arglist):
                     #     userenv.action_list[user.id].append(action_user)
 
                     #     new_user_action=simulationenv.set_user_action(action_user)
-                        new_user_action=[15,1]
+                        new_user_action=[10,0.8]
                         # print("user-"+str(user.id)+"-action:"+str(new_user_action)+"time:"+str(simulationenv.sys_time))
                         #user environment step
                         rew, done = simulationenv.user_step(new_user_action,user.id)
