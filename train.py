@@ -20,9 +20,9 @@ from User import User, update_time, ObT
 from users_env import UserEnv
 from scheduler_env import SchedulerEnv
 from maac_1_3_1 import AgentTrainer
-from ddpg import SchedulerTrainer
+from ddpg3 import SchedulerTrainer
 
-from simulation_env import SimulationEnv
+from simulation_env_1 import SimulationEnv
 import time
 np.random.seed(2)
 tf.set_random_seed(2)  # reproducible
@@ -53,7 +53,7 @@ def parse_args():
     parser.add_argument("--save_dir", type=str, default="model/", help="directory in which training state and model should be saved")
     parser.add_argument("--save_rate", type=int, default=10, help="save model once every time this many episodes are completed")
     parser.add_argument("--load_dir", type=str, default="", help="directory in which training state and model are loaded")
-    parser.add_argument("--mode", type=str, default="train", help="train or test")
+    parser.add_argument("--mode", type=str, default="load", help="train or test")
 
     parser.add_argument("--result_file",type=str, default="result.txt")
     # Evaluation
@@ -95,33 +95,35 @@ def train(arglist):
     # get user agent 
     # obs_shape_n = [userenv.observation_space[i].shape for i in range(userenv.n)]
     trainers = get_trainers(userenv, sess, arglist)
-    saver = tf.train.Saver(max_to_keep=200)
+    
     #get scheduler agent
     schedulerTrainer=SchedulerTrainer(schedulerenv.s_dim,schedulerenv.a_dim)
     
+    saver = tf.train.Saver(max_to_keep=200)
     tempfilename = os.path.basename(__file__)
     (filename, extension) = os.path.splitext(tempfilename)
+    filename=filename+'_1'
     logfliename=filename+"/"+"logs/"
     os.makedirs(os.path.dirname(logfliename), exist_ok=True)
     tf.summary.FileWriter(logfliename,sess.graph)
-    if arglist.mode == "test":
+    if arglist.mode == "load":
         
-        checkpoint = tf.train.get_checkpoint_state("model/")
+        checkpoint = tf.train.get_checkpoint_state("train_1/model/")
         if checkpoint and checkpoint.model_checkpoint_path:
             saver.restore(sess, checkpoint.model_checkpoint_path)
             print("Successfully loaded:", checkpoint.model_checkpoint_path)
         else:
             print("Could not find old network weights")
         
-        uninitialized_vars = []
-        for var in tf.global_variables():
-            try:
-                sess.run(var)
-            except tf.errors.FailedPreconditionError:
-                uninitialized_vars.append(var)
+        # uninitialized_vars = []
+        # for var in tf.global_variables():
+        #     try:
+        #         sess.run(var)
+        #     except tf.errors.FailedPreconditionError:
+        #         uninitialized_vars.append(var)
     
-        initialize_op = tf.variables_initializer(uninitialized_vars)
-        sess.run(initialize_op)
+        # initialize_op = tf.variables_initializer(uninitialized_vars)
+        # sess.run(initialize_op)
     else:
         sess.run(tf.global_variables_initializer())
 

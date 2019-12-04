@@ -3,8 +3,8 @@ import numpy as np
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 from tensorflow.python import pywrap_tensorflow
-model_dir=r'train1_3_1_2/model'
-checkpoint_path = os.path.join(model_dir, "-1000")
+model_dir=r'train_1/model'
+checkpoint_path = os.path.join(model_dir, "-120")
 
 reader = pywrap_tensorflow.NewCheckpointReader(checkpoint_path)
 
